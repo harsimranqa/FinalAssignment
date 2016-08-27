@@ -452,7 +452,7 @@ public class MainFrame extends javax.swing.JFrame {
       
         
         
-//compare 2 sheets of the source and destination workbooks  
+    //compare 2 sheets of the source and destination workbooks  
         int firstRow1 = sheet1.getFirstRowNum()+1;
         int lastRow1 = sheet1.getPhysicalNumberOfRows();
         int lastRow2=sheet2.getPhysicalNumberOfRows();
