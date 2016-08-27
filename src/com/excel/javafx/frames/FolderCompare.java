@@ -76,6 +76,7 @@ public class FolderCompare extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         SourceBtn.setText("Choose folder...");
         SourceBtn.addActionListener(new java.awt.event.ActionListener() {
