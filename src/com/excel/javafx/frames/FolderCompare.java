@@ -307,7 +307,7 @@ public class FolderCompare extends javax.swing.JFrame {
                 Logger.getLogger(FolderCompare.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        else{
+       
                 for(int i=firstRow1; i < lastRow1; i++) {
 
                     System.out.println("\n\nComparing Row "+i);
@@ -337,7 +337,7 @@ public class FolderCompare extends javax.swing.JFrame {
                         }
                     }
                 }
-            }
+            
         return equalSheets;
     }
 
