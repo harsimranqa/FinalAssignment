@@ -6,10 +6,14 @@
 package com.excel.javafx.frames;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -35,6 +39,11 @@ public class MainFrame extends javax.swing.JFrame {
     public File destFileName=null;
     private StyledDocument doc=null;
     private Style stylered,styleblack=null;
+    private List<String> rows,cell,expected,actual,result=null;
+    private int rowsreport=0;
+    private int columnsreport=0;
+    private int sourcerowcount=0;
+    private int destrowcount=0;
     /**
      * Creates new form MainFrame
      */
@@ -75,6 +84,7 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         results = new javax.swing.JTextPane();
         jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -166,6 +176,13 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jButton4.setText("Open excel Report");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -193,8 +210,13 @@ public class MainFrame extends javax.swing.JFrame {
                             .addComponent(jLabel2)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                             .addComponent(DestinationBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(77, 77, 77)
-                        .addComponent(jButton3)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(77, 77, 77)
+                                .addComponent(jButton3))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(86, 86, 86)
+                                .addComponent(jButton4)))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 53, Short.MAX_VALUE)
@@ -232,15 +254,20 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(CompareBtn)
                         .addGap(37, 37, 37))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(DestinationBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton3))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(destSheetSelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(DestinationBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jButton3))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(destSheetSelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(100, 100, 100)
+                                .addComponent(jButton4)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -312,6 +339,13 @@ public class MainFrame extends javax.swing.JFrame {
        //compare the 2 excel sheets
         
         try {
+            rowsreport=0;
+            columnsreport=sourceColumnList.getSelectedIndices().length;
+            rows=new ArrayList<String>();
+            cell=new ArrayList<String>();
+            expected=new ArrayList<String>();
+            actual=new ArrayList<String>();
+            result=new ArrayList<String>();
             results.setText("");    //blank the results testarea
             // get input excel files
             FileInputStream sourceFile = new FileInputStream(sourceFileName);
@@ -332,10 +366,12 @@ public class MainFrame extends javax.swing.JFrame {
                 System.out.println("\n\nThe two excel sheets are Not Equal");
             }
             
+            
             //close files
             sourceFile.close();
             destFile.close();
             
+            excelReport();
 
             
         } catch (Exception e) {
@@ -447,16 +483,26 @@ public class MainFrame extends javax.swing.JFrame {
         new FolderCompare().setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        try {
+           // Runtime.getRuntime().exec("report/report.xlsx");
+            
+            Desktop.getDesktop().open(new File("report\\report.xlsx"));
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
      // Compare Two Sheets
     public  boolean compareTwoSheets(XSSFSheet sheet1, XSSFSheet sheet2) {
-      
-        
         
     //compare 2 sheets of the source and destination workbooks  
         int firstRow1 = sheet1.getFirstRowNum()+1;
+        int firstRow2 = sheet2.getFirstRowNum()+1;
         int lastRow1 = sheet1.getPhysicalNumberOfRows();
         int lastRow2=sheet2.getPhysicalNumberOfRows();
-        
+        sourcerowcount=lastRow1-firstRow1;
+        destrowcount=lastRow2-firstRow2;
         boolean equalSheets = true;
         if(!(lastRow1==lastRow2)){
             try {
@@ -469,8 +515,8 @@ public class MainFrame extends javax.swing.JFrame {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        else{
-                for(int i=firstRow1; i < lastRow1; i++) {
+       
+                for(int i=firstRow1; i <lastRow1; i++) {
 
                     System.out.println("\n\nComparing Row "+i);
 
@@ -482,7 +528,10 @@ public class MainFrame extends javax.swing.JFrame {
                             System.out.println("Row "+i+" - Not Equal");
                             doc.insertString(doc.getLength(), " Row "+i+" -Not Equal ",stylered);
                             doc.insertString(doc.getLength(), "\n", null );
-
+                            for(int j=0;j<columnsreport;j++){
+                                rows.add("Row "+i);
+                            }
+                         //   result.add("Not Equal");
                         } catch (BadLocationException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -491,12 +540,16 @@ public class MainFrame extends javax.swing.JFrame {
                             System.out.println("Row "+i+" - Equal");
                             doc.insertString(doc.getLength(), " Row "+i+" -Equal ",styleblack);
                             doc.insertString(doc.getLength(), "\n", null );
+                            for(int j=0;j<columnsreport;j++){
+                                rows.add("Row "+i);
+                            }
+                       //     result.add("Equal");
                         } catch (BadLocationException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }
-             }    
+                 
         return equalSheets;
     }
 
@@ -520,8 +573,10 @@ public class MainFrame extends javax.swing.JFrame {
           for(int columncount=0;columncount<srccolumnSelected.length;columncount++){  
             XSSFCell cell1 = row1.getCell(srccolumnSelected[columncount]);
             XSSFCell cell2 = row2.getCell(destcolumnSelected[columncount]);
+            rowsreport++;
             if(!compareTwoCells(cell1, cell2)) {
                 try {
+                    
                     equalRows = false;
                     cell1.setCellType(HSSFCell.CELL_TYPE_STRING);
                     cell2.setCellType(HSSFCell.CELL_TYPE_STRING);
@@ -531,7 +586,10 @@ public class MainFrame extends javax.swing.JFrame {
                     doc.insertString(doc.getLength(), " Cell "+srccolumnSelected[columncount]+"**Expected Value= "+cell1.getStringCellValue(),stylered);
                     doc.insertString(doc.getLength(),"  **Actual Value= "+cell2.getStringCellValue()+" - Not Equal",stylered);
                     doc.insertString(doc.getLength(), "\n", null );
-                    
+                    cell.add("Cell "+srccolumnSelected[columncount]);
+                    expected.add(cell1.getStringCellValue());
+                    actual.add(cell2.getStringCellValue());
+                    result.add("Not Equal");
                 } catch (BadLocationException ex) {
                     Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -540,6 +598,10 @@ public class MainFrame extends javax.swing.JFrame {
                     doc.insertString(doc.getLength(), " Cell "+srccolumnSelected[columncount]+"**Expected Value= "+cell1.getStringCellValue(),styleblack);
                     doc.insertString(doc.getLength(),"  **Actual Value= "+cell2.getStringCellValue()+" - Equal",styleblack);
                     doc.insertString(doc.getLength(), "\n", null );
+                    cell.add("Cell "+srccolumnSelected[columncount]);
+                    expected.add(cell1.getStringCellValue());
+                    actual.add(cell2.getStringCellValue());
+                    result.add("Equal");
                 } catch (BadLocationException ex) {
                     Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -612,6 +674,74 @@ public class MainFrame extends javax.swing.JFrame {
         }
         return equalCells;
     }
+    
+    public void excelReport(){
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Comparison Results");
+        XSSFRow row=sheet.createRow(0); //headers
+        XSSFCell cell1=row.createCell(0);XSSFCell cell2=row.createCell(1);XSSFCell cell3=row.createCell(2);XSSFCell cell4=row.createCell(3);
+        XSSFCell cell5=row.createCell(4);XSSFCell cell6=row.createCell(5);XSSFCell cell7=row.createCell(6);XSSFCell cell8=row.createCell(7);
+        XSSFCell cell9=row.createCell(8);XSSFCell cell10=row.createCell(9);XSSFCell cell11=row.createCell(10);
+        cell1.setCellValue("Source File");cell2.setCellValue("Dest File");cell3.setCellValue("Source Sheet");cell4.setCellValue("Dest Sheet");
+        cell5.setCellValue("Row number");cell6.setCellValue("Source Columns");cell7.setCellValue("Dest Columns");cell8.setCellValue("Cell number");
+        cell9.setCellValue("Expected Value");cell10.setCellValue("Actual Value");cell11.setCellValue("Result");
+        
+        for(int rowcount=1;rowcount<=expected.size();rowcount++){
+             row=sheet.createRow(rowcount);
+             XSSFCell cellvalue1=row.createCell(0);XSSFCell cellvalue2=row.createCell(1);XSSFCell cellvalue3=row.createCell(2);
+             XSSFCell cellvalue4=row.createCell(3);XSSFCell cellvalue5=row.createCell(4);XSSFCell cellvalue6=row.createCell(5);
+             XSSFCell cellvalue7=row.createCell(6);XSSFCell cellvalue8=row.createCell(7);XSSFCell cellvalue9=row.createCell(8);
+             XSSFCell cellvalue10=row.createCell(9);XSSFCell cellvalue11=row.createCell(10);
+             cellvalue1.setCellValue(sourceFileName.getName());
+             cellvalue2.setCellValue(destFileName.getName());
+             cellvalue3.setCellValue(sourceSheetSelector.getSelectedItem().toString());
+             cellvalue4.setCellValue(destSheetSelector.getSelectedItem().toString());
+             
+             if(rowcount-1<rows.size()){
+                 cellvalue5.setCellValue(rows.get(rowcount-1));
+             }
+             List<String>sourcecolumns=sourceColumnList.getSelectedValuesList();
+             List<String>sourcecolumnsupdated=new ArrayList<String>();
+             for(int i=0;i<sourcecolumns.size();i++){
+                 for(int j=0;j<sourcerowcount;j++){
+                     sourcecolumnsupdated.add(sourcecolumns.get(i));
+                 }
+             }
+             
+             List<String>destcolumns=destColumnList.getSelectedValuesList();
+             List<String>destcolumnsupdated=new ArrayList<String>();
+             for(int i=0;i<destcolumns.size();i++){
+                 for(int j=0;j<destrowcount;j++){
+                     destcolumnsupdated.add(destcolumns.get(i));
+                 }
+             }
+             if(rowcount-1<sourcecolumnsupdated.size()){
+                 cellvalue6.setCellValue(sourcecolumnsupdated.get(rowcount-1));
+             }
+             if(rowcount-1<destcolumnsupdated.size()){
+                 cellvalue7.setCellValue(destcolumnsupdated.get(rowcount-1));
+             }
+             if(rowcount-1<cell.size()){
+                 cellvalue8.setCellValue(cell.get(rowcount-1));
+             }
+             if(rowcount-1<expected.size()){
+                 cellvalue9.setCellValue(expected.get(rowcount-1));
+             }
+             if(rowcount-1<actual.size()){
+                 cellvalue10.setCellValue(actual.get(rowcount-1));
+             }
+             if(rowcount-1<result.size()){
+                 cellvalue11.setCellValue(result.get(rowcount-1));
+             }
+        }
+        try (FileOutputStream outputStream = new FileOutputStream("report/report.xlsx")) {
+            workbook.write(outputStream);
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
     /**
      * 
      * @param args the command line arguments
@@ -657,6 +787,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

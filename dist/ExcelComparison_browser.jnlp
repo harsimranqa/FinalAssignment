@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="ExcelComparison_browser.jnlp">
+  <information>
+    <title>ExcelComparison</title>
+    <vendor>harsimran</vendor>
+    <description>null</description>
+    <offline-allowed/>
+  </information>
+  <resources>
+    <jfx:javafx-runtime version="8.0+" href="http://javadl.sun.com/webapps/download/GetFile/javafx-latest/windows-i586/javafx2.jnlp"/>
+  </resources>
+  <resources>
+    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="ExcelComparison.jar" size="32815" download="eager" />
+    <jar href="lib/curvesapi-1.03.jar" size="92241" download="eager" />
+    <jar href="lib/poi-3.14-20160307.jar" size="2528204" download="eager" />
+    <jar href="lib/poi-ooxml-3.14-20160307.jar" size="1286511" download="eager" />
+    <jar href="lib/poi-ooxml-schemas-3.14-20160307.jar" size="5919795" download="eager" />
+    <jar href="lib/xmlbeans-2.6.0.jar" size="2730866" download="eager" />
+  </resources>
+  <applet-desc  width="800" height="600" main-class="com.excel.javafx.frames.MainFrame"  name="ExcelComparison" >
+  </applet-desc>
+  <update check="always"/>
+</jnlp>

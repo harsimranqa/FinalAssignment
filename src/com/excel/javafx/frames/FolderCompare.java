@@ -8,6 +8,8 @@ package com.excel.javafx.frames;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -40,6 +42,11 @@ public class FolderCompare extends javax.swing.JFrame {
     private File destFiles[]=null;
     private StyledDocument doc=null;
     private Style stylered,styleblack=null;
+    private List<String> rows,cell,expected,actual,result=null;
+    private int rowsreport=0;
+    private int columnsreport=0;
+    private int sourcerowcount=0;
+    private int destrowcount=0;
     
     public FolderCompare() {
         initComponents();
@@ -228,6 +235,12 @@ public class FolderCompare extends javax.swing.JFrame {
     private void CompareBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CompareBtnActionPerformed
     //compare selected files from the list
         try {
+            rowsreport=0;
+            rows=new ArrayList<String>();
+            cell=new ArrayList<String>();
+            expected=new ArrayList<String>();
+            actual=new ArrayList<String>();
+            result=new ArrayList<String>();
             List<String> sourceFiles=new ArrayList<String>();
             List<String> destFiles=new ArrayList<String>();
             results.setText("");
@@ -265,6 +278,8 @@ public class FolderCompare extends javax.swing.JFrame {
            // close files
             sourceFile.close();
             destFile.close();
+            
+            excelReport();
         }
           } catch (Exception e) {
             e.printStackTrace();
@@ -274,9 +289,13 @@ public class FolderCompare extends javax.swing.JFrame {
     public  boolean compareTwoSheets(XSSFSheet sheet1, XSSFSheet sheet2) {
         
         int firstRow1 = sheet1.getFirstRowNum()+1;
+        int firstRow2 = sheet2.getFirstRowNum()+1;
         int lastRow1 = sheet1.getPhysicalNumberOfRows();
         int lastRow2 = sheet2.getPhysicalNumberOfRows();
+        
         boolean equalSheets = true;
+        sourcerowcount=lastRow1-firstRow1;
+        destrowcount=lastRow2-firstRow2;
         if(!(lastRow1==lastRow2)){
             try {
                 equalSheets=false;
@@ -295,6 +314,9 @@ public class FolderCompare extends javax.swing.JFrame {
 
                     XSSFRow row1 = sheet1.getRow(i);
                     XSSFRow row2 = sheet2.getRow(i);
+                    
+                    rows.add("Row "+i);   //add rows
+                    
                     if(!compareTwoRows(row1, row2)) {
                         try {
                             equalSheets = false;
@@ -350,7 +372,10 @@ public class FolderCompare extends javax.swing.JFrame {
                     doc.insertString(doc.getLength(), " Cell "+count+"**Expected Value= "+cell1.getStringCellValue(),stylered);
                     doc.insertString(doc.getLength(),"  **Actual Value= "+cell2.getStringCellValue()+" - Not Equal",stylered);
                     doc.insertString(doc.getLength(), "\n", null );
-                    
+                    cell.add("Cell "+count);
+                    expected.add(cell1.getStringCellValue());
+                    actual.add(cell2.getStringCellValue());
+                    result.add("Not Equal");
                 } catch (BadLocationException ex) {
                     Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -359,6 +384,10 @@ public class FolderCompare extends javax.swing.JFrame {
                     doc.insertString(doc.getLength(), " Cell "+count+"**Expected Value= "+cell1.getStringCellValue(),styleblack);
                     doc.insertString(doc.getLength(),"  **Actual Value= "+cell2.getStringCellValue()+" - Equal",styleblack);
                     doc.insertString(doc.getLength(), "\n", null );
+                    cell.add("Cell "+count);
+                    expected.add(cell1.getStringCellValue());
+                    actual.add(cell2.getStringCellValue());
+                    result.add("Equal");
                 } catch (BadLocationException ex) {
                     Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -458,6 +487,71 @@ public class FolderCompare extends javax.swing.JFrame {
         destFileList.setModel(model);
         for(int fileCount=0;fileCount<listOfFiles.length;fileCount++){
          model.addElement(listOfFiles[fileCount].getName());
+        }
+    }
+    
+    public void excelReport(){
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Comparison Results");
+        List<String> sourceFiles=sourceFileList.getSelectedValuesList();
+        List<String> sourceFilesUpdated=new ArrayList<String>();
+        List<String> destFiles=destFileList.getSelectedValuesList();
+        List<String> destFilesUpdated=new ArrayList<String>();
+        List<String> sourceRows=rows;
+        List<String> sourceRowsUpdated=new ArrayList<String>();
+        XSSFRow row=sheet.createRow(0); //headers
+        XSSFCell cell1=row.createCell(0);XSSFCell cell2=row.createCell(1);XSSFCell cell3=row.createCell(2);XSSFCell cell4=row.createCell(3);
+        XSSFCell cell5=row.createCell(4);XSSFCell cell6=row.createCell(5);XSSFCell cell7=row.createCell(6);
+        cell1.setCellValue("Source File");cell2.setCellValue("Dest File");
+        cell3.setCellValue("Row number");cell4.setCellValue("Cell number");
+        cell5.setCellValue("Expected Value");cell6.setCellValue("Actual Value");cell7.setCellValue("Result");
+        
+        //populate source Files selected
+        for(int i=0;i<sourceFileList.getSelectedValuesList().size();i++){
+           
+            for(int j=0;j<sourcerowcount;j++){
+                 
+                 sourceFilesUpdated.add(sourceFiles.get(i));
+             }
+            
+        }
+        
+        //populate dest files selected
+         for(int i=0;i<destFileList.getSelectedValuesList().size();i++){
+            for(int j=0;j<destrowcount;j++){
+               
+                 destFilesUpdated.add(destFiles.get(i));
+             }
+        }
+         
+         //populate rows
+         for(int i=0;i<destrowcount;i++){
+            for(int j=0;j<sourceRows.size();j++){
+                
+                 sourceRowsUpdated.add(sourceRows.get(i));
+             }
+        }
+         
+         //updateReport
+        for(int rowcount=1;rowcount<=rows.size();rowcount++){
+             row=sheet.createRow(rowcount);
+             XSSFCell cellvalue1=row.createCell(0);XSSFCell cellvalue2=row.createCell(1);XSSFCell cellvalue3=row.createCell(2);
+             XSSFCell cellvalue4=row.createCell(3);XSSFCell cellvalue5=row.createCell(4);XSSFCell cellvalue6=row.createCell(5);
+             XSSFCell cellvalue7=row.createCell(6);
+             
+             
+             cellvalue1.setCellValue(sourceFilesUpdated.get(rowcount-1));
+             cellvalue2.setCellValue(destFilesUpdated.get(rowcount-1));
+             cellvalue3.setCellValue(sourceRowsUpdated.get(rowcount-1));
+             cellvalue4.setCellValue(cell.get(rowcount-1));
+             cellvalue5.setCellValue(expected.get(rowcount-1));
+             cellvalue6.setCellValue(actual.get(rowcount-1));
+             cellvalue7.setCellValue(result.get(rowcount-1));
+        }
+        try (FileOutputStream outputStream = new FileOutputStream("report/report.xlsx")) {
+        //    workbook.write(outputStream);
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     /**
