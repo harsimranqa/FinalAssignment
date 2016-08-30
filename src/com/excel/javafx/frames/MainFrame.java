@@ -23,6 +23,9 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -44,6 +47,7 @@ public class MainFrame extends javax.swing.JFrame {
     private int columnsreport=0;
     private int sourcerowcount=0;
     private int destrowcount=0;
+    private int listcount=0;
     /**
      * Creates new form MainFrame
      */
@@ -371,7 +375,7 @@ public class MainFrame extends javax.swing.JFrame {
             sourceFile.close();
             destFile.close();
             
-            excelReport();
+            excelReportUpdated();
 
             
         } catch (Exception e) {
@@ -487,7 +491,7 @@ public class MainFrame extends javax.swing.JFrame {
         try {
            // Runtime.getRuntime().exec("report/report.xlsx");
             
-            Desktop.getDesktop().open(new File("report\\report.xlsx"));
+            Desktop.getDesktop().open(new File("report"));
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -741,7 +745,57 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }
     
-    
+    public void excelReportUpdated(){
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Comparison Results");
+        CellStyle style = workbook.createCellStyle();
+        listcount=sourceColumnList.getSelectedValuesList().size();
+        List<String> columnnames=sourceColumnList.getSelectedValuesList();
+        int colcount=0; 
+        int headercount=0;
+        int rowcount=1;
+     
+            XSSFRow row=sheet.createRow(0);  //header row creation
+            XSSFCell cell=null;
+            
+            
+            for(String columnname: columnnames){
+                
+                cell=row.createCell(headercount);
+                cell.setCellValue(columnnames.get(headercount));
+                headercount++;
+            }
+            
+            row=sheet.createRow(rowcount);
+            for(int columncount=0;columncount<expected.size();columncount++){
+                
+                cell=row.createCell(colcount);
+                if(expected.get(columncount).equals(actual.get(columncount))){
+                cell.setCellValue(expected.get(columncount));
+                }
+                else{
+                cell.setCellValue(expected.get(columncount)+"--"+actual.get(columncount)); 
+                Font font = workbook.createFont();
+                font.setColor(HSSFColor.RED.index);
+                style.setFont(font);
+                cell.setCellStyle(style);
+                }
+                colcount++;
+                if(colcount==listcount){
+                    rowcount++;
+                    row=sheet.createRow(rowcount);
+                    colcount=0;
+                }
+            }
+            
+   
+        
+        try (FileOutputStream outputStream = new FileOutputStream("report/report.xlsx")) {
+            workbook.write(outputStream);
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     /**
      * 
      * @param args the command line arguments

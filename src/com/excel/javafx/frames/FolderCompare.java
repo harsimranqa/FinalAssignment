@@ -6,6 +6,7 @@
 package com.excel.javafx.frames;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,6 +22,9 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -45,8 +49,10 @@ public class FolderCompare extends javax.swing.JFrame {
     private List<String> rows,cell,expected,actual,result=null;
     private int rowsreport=0;
     private int columnsreport=0;
+    private int columnscount=0;
     private int sourcerowcount=0;
     private int destrowcount=0;
+    private List<String> sourceColumnList=null;
     
     public FolderCompare() {
         initComponents();
@@ -81,6 +87,7 @@ public class FolderCompare extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         sourceFileList = new javax.swing.JList<>();
         jLabel1 = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -130,6 +137,13 @@ public class FolderCompare extends javax.swing.JFrame {
 
         jLabel1.setText("Source File");
 
+        jButton4.setText("Open excel Report");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -154,8 +168,10 @@ public class FolderCompare extends javax.swing.JFrame {
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                             .addComponent(DestinationBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(77, 77, 77)
-                        .addComponent(jButton3)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton3)
+                            .addComponent(jButton4))))
+                .addContainerGap(218, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 52, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -179,7 +195,8 @@ public class FolderCompare extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel5)
-                            .addComponent(jLabel3)))
+                            .addComponent(jLabel3)
+                            .addComponent(jButton4)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -236,11 +253,7 @@ public class FolderCompare extends javax.swing.JFrame {
     //compare selected files from the list
         try {
             rowsreport=0;
-            rows=new ArrayList<String>();
-            cell=new ArrayList<String>();
-            expected=new ArrayList<String>();
-            actual=new ArrayList<String>();
-            result=new ArrayList<String>();
+            
             List<String> sourceFiles=new ArrayList<String>();
             List<String> destFiles=new ArrayList<String>();
             results.setText("");
@@ -249,6 +262,11 @@ public class FolderCompare extends javax.swing.JFrame {
             int destFilesSelected[]=destFileList.getSelectedIndices();
             
         for(int filecount=0;filecount<sourceFilesSelected.length;filecount++){
+            rows=new ArrayList<String>();
+            cell=new ArrayList<String>();
+            expected=new ArrayList<String>();
+            actual=new ArrayList<String>();
+            result=new ArrayList<String>();
             sourceFiles=sourceFileList.getSelectedValuesList();
             destFiles=destFileList.getSelectedValuesList();
             String filename=sourceFolder.toString()+sourceFiles.get(filecount);
@@ -279,7 +297,7 @@ public class FolderCompare extends javax.swing.JFrame {
             sourceFile.close();
             destFile.close();
             
-            excelReport();
+            excelReportUpdated(filecount);
         }
           } catch (Exception e) {
             e.printStackTrace();
@@ -292,7 +310,7 @@ public class FolderCompare extends javax.swing.JFrame {
         int firstRow2 = sheet2.getFirstRowNum()+1;
         int lastRow1 = sheet1.getPhysicalNumberOfRows();
         int lastRow2 = sheet2.getPhysicalNumberOfRows();
-        
+        sourceColumnList=new ArrayList<String>();
         boolean equalSheets = true;
         sourcerowcount=lastRow1-firstRow1;
         destrowcount=lastRow2-firstRow2;
@@ -306,6 +324,10 @@ public class FolderCompare extends javax.swing.JFrame {
             } catch (BadLocationException ex) {
                 Logger.getLogger(FolderCompare.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+        columnscount=sheet1.getRow(0).getPhysicalNumberOfCells();
+        for(int headercount=0;headercount<columnscount;headercount++){
+            sourceColumnList.add(sheet1.getRow(0).getCell(headercount).getStringCellValue());
         }
        
                 for(int i=firstRow1; i < lastRow1; i++) {
@@ -479,6 +501,16 @@ public class FolderCompare extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_DestinationBtnActionPerformed
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        try {
+            // Runtime.getRuntime().exec("report/report.xlsx");
+
+            Desktop.getDesktop().open(new File("report"));
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     
     private void getDestFiles(){
     //select destination files from the selcted destination folder    
@@ -554,6 +586,59 @@ public class FolderCompare extends javax.swing.JFrame {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    
+    public void excelReportUpdated(int sheetnumber){
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Comparison Results");
+        CellStyle style = workbook.createCellStyle();
+        
+        
+        int colcount=0; 
+        int headercount=0;
+        int rowcount=1;
+     
+            XSSFRow row=sheet.createRow(0);  //header row creation
+            XSSFCell cell=null;
+            
+            
+            for(String columnname: sourceColumnList){
+                
+                cell=row.createCell(headercount);
+                cell.setCellValue(sourceColumnList.get(headercount));
+                headercount++;
+            }
+            
+            row=sheet.createRow(rowcount);
+            for(int columncount=0;columncount<expected.size();columncount++){
+                
+                cell=row.createCell(colcount);
+                if(expected.get(columncount).equals(actual.get(columncount))){
+                cell.setCellValue(expected.get(columncount));
+                }
+                else{
+                cell.setCellValue(expected.get(columncount)+"--"+actual.get(columncount)); 
+                Font font = workbook.createFont();
+                font.setColor(HSSFColor.RED.index);
+                style.setFont(font);
+                cell.setCellStyle(style);
+                }
+                colcount++;
+                if(colcount==sourceColumnList.size()){
+                    rowcount++;
+                    row=sheet.createRow(rowcount);
+                    colcount=0;
+                }
+            }
+            
+   
+        
+        try (FileOutputStream outputStream = new FileOutputStream("report/"+"report"+sheetnumber+".xlsx")) {
+            workbook.write(outputStream);
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     /**
      * @param args the command line arguments
      */
@@ -595,6 +680,7 @@ public class FolderCompare extends javax.swing.JFrame {
     private javax.swing.JButton SourceBtn;
     private javax.swing.JList<String> destFileList;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
